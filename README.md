@@ -4,7 +4,7 @@
 
 **Entrega:** AV2 — Protótipo de Software Orientado a Dados
 
-**Equipe:** Isabelly, Maria Dionila e Maria Carolina
+**Equipe:** Isabelly Rodrigues, Maria Dionila e Maria Carolina
 
 **Professor:** Alandey Severo Leite da Silva
 
