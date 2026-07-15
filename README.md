@@ -4,7 +4,7 @@
 DADM00270 — Engenharia de Software para Negócios — UFPB (2026.1)
 Entrega: **AV2** — Protótipo de Software Orientado a Dados
 
-**Aluno(s):** _______________
+**Aluno(s):** Isabelly, Maria Dionila e Maria Carolina
 **Professor:** Alandey Severo Leite da Silva
 
 ---
