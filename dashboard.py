@@ -1,376 +1,246 @@
-"""
-FinTrack — Dashboard de Análise de Dados (AV2)
-Rode com: streamlit run dashboard.py
-Abre automaticamente em http://localhost:8501
-"""
+"""FinTrack Insights — dashboard de inteligência de campanhas bancárias."""
 
-import pandas as pd
+from __future__ import annotations
+
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# ---------------------------------------------------------------
-# Configuração da página
-# ---------------------------------------------------------------
+from app_core import load_data, segment_summary, summarize
+
+
 st.set_page_config(
-    page_title="FinTrack — Dashboard",
-    page_icon="💰",
+    page_title="FinTrack Insights",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-PRIMARY = "#2E7D6B"
-PRIMARY_DARK = "#1F5C4F"
+PRIMARY = "#1F5C4F"
+SECONDARY = "#2E7D6B"
 ACCENT = "#F2A65A"
-ACCENT_2 = "#4C6EF5"
-MUTED = "#8A9A97"
-CARD_BG = "#FFFFFF"
-PAGE_BG = "#F4F6F5"
-TEXT = "#1F2A28"
-
-PALETTE = ["#2E7D6B", "#F2A65A", "#4C6EF5", "#E4572E", "#8E5572", "#3AAFA9"]
+BLUE = "#4C6EF5"
+TEXT = "#17211E"
+MUTED = "#66736F"
+GRID = "#E8ECEA"
+PALETTE = [PRIMARY, ACCENT, BLUE, "#E4572E", "#8E5572", "#3AAFA9"]
 px.defaults.color_discrete_sequence = PALETTE
 
-# ---------------------------------------------------------------
-# CSS customizado
-# ---------------------------------------------------------------
 st.markdown(
     f"""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-        html, body, [class*="css"] {{
-            font-family: 'Inter', sans-serif;
-        }}
-
-        .stApp {{
-            background-color: {PAGE_BG};
-        }}
-
-        #MainMenu, footer, header {{visibility: hidden;}}
-
-        .block-container {{
-            padding-top: 1.5rem;
-            padding-bottom: 3rem;
-            max-width: 1200px;
-        }}
-
-        /* ---- Cabeçalho ---- */
-        .fintrack-header {{
-            background: linear-gradient(120deg, {PRIMARY} 0%, {PRIMARY_DARK} 100%);
-            padding: 28px 34px;
-            border-radius: 18px;
-            color: white;
-            margin-bottom: 26px;
-            box-shadow: 0 10px 30px rgba(46, 125, 107, 0.25);
-        }}
-        .fintrack-header h1 {{
-            margin: 0;
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }}
-        .fintrack-header p {{
-            margin: 6px 0 0 0;
-            opacity: 0.9;
-            font-size: 14.5px;
-            font-weight: 400;
-        }}
-
-        /* ---- Cards de KPI ---- */
-        .kpi-card {{
-            background: {CARD_BG};
-            border-radius: 16px;
-            padding: 18px 20px;
-            box-shadow: 0 4px 18px rgba(31, 42, 40, 0.06);
-            border: 1px solid rgba(31, 42, 40, 0.05);
-            height: 100%;
-        }}
-        .kpi-label {{
-            font-size: 13px;
-            font-weight: 600;
-            color: {MUTED};
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 6px;
-        }}
-        .kpi-value {{
-            font-size: 28px;
-            font-weight: 800;
-            color: {TEXT};
-        }}
-        .kpi-sub {{
-            font-size: 12.5px;
-            color: {MUTED};
-            margin-top: 4px;
-        }}
-
-        /* ---- Cards de gráfico ---- */
-        .chart-card {{
-            background: {CARD_BG};
-            border-radius: 16px;
-            padding: 20px 20px 6px 20px;
-            box-shadow: 0 4px 18px rgba(31, 42, 40, 0.06);
-            border: 1px solid rgba(31, 42, 40, 0.05);
-            margin-bottom: 22px;
-        }}
-        .chart-title {{
-            font-size: 15.5px;
-            font-weight: 700;
-            color: {TEXT};
-            margin-bottom: 4px;
-        }}
-        .chart-subtitle {{
-            font-size: 12.5px;
-            color: {MUTED};
-            margin-bottom: 10px;
-        }}
-
-        /* ---- Sidebar ---- */
-        section[data-testid="stSidebar"] {{
-            background-color: #FFFFFF;
-            border-right: 1px solid rgba(31,42,40,0.06);
-        }}
-        section[data-testid="stSidebar"] .stMultiSelect label,
-        section[data-testid="stSidebar"] .stSlider label {{
-            font-weight: 600;
-            color: {TEXT};
-        }}
-
-        div[data-testid="stExpander"] {{
-            background: {CARD_BG};
-            border-radius: 14px;
-            border: 1px solid rgba(31, 42, 40, 0.06);
-        }}
+      .stApp {{ background: #F5F7F6; }}
+      .block-container {{ max-width: 1260px; padding-top: 1.4rem; padding-bottom: 3rem; }}
+      #MainMenu, footer {{ visibility: hidden; }}
+      .hero {{
+        padding: 28px 32px; border-radius: 20px; color: white;
+        background: linear-gradient(120deg, {PRIMARY}, #143E35);
+        box-shadow: 0 12px 30px rgba(31,92,79,.20); margin-bottom: 20px;
+      }}
+      .hero h1 {{ margin: 0; font-size: 2rem; }}
+      .hero p {{ margin: 7px 0 0; opacity: .9; }}
+      .definition {{ color: {MUTED}; font-size: .82rem; line-height: 1.45; }}
+      section[data-testid="stSidebar"] {{ background: white; }}
+      div[data-testid="stMetric"] {{
+        background: white; border: 1px solid #E5EAE8; border-radius: 15px;
+        padding: 16px 18px; box-shadow: 0 4px 14px rgba(20,62,53,.05);
+      }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 
-def chart_layout(fig, height=380):
+def style_figure(fig: go.Figure, height: int = 360) -> go.Figure:
     fig.update_layout(
         height=height,
-        margin=dict(l=10, r=10, t=10, b=10),
-        plot_bgcolor="white",
+        margin=dict(l=10, r=10, t=34, b=10),
         paper_bgcolor="white",
-        font=dict(family="Inter, sans-serif", color=TEXT, size=13),
-        xaxis=dict(showgrid=True, gridcolor="#EEF1F0", zeroline=False),
-        yaxis=dict(showgrid=True, gridcolor="#EEF1F0", zeroline=False),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        plot_bgcolor="white",
+        font=dict(color=TEXT, size=13),
+        xaxis=dict(gridcolor=GRID, zeroline=False),
+        yaxis=dict(gridcolor=GRID, zeroline=False),
+        legend=dict(orientation="h", y=1.12, x=0),
+        hoverlabel=dict(bgcolor="white"),
     )
     return fig
 
 
-# ---------------------------------------------------------------
-# Carregamento dos dados
-# ---------------------------------------------------------------
 @st.cache_data
-def carregar_dados():
-    df = pd.read_csv("dados_tratados.csv")
-    mapa_meses = {
-        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
-        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
-    }
-    df["mes_num"] = df["mes_contato"].map(mapa_meses)
-    df["aderiu_label"] = df["aderiu_produto"].map({1: "Sim", 0: "Não"})
-    df["emprestimo_label"] = df["possui_emprestimo_pessoal"].map({1: "Sim", 0: "Não"})
-    df["financiamento_label"] = df["possui_financiamento_imovel"].map({1: "Sim", 0: "Não"})
-    return df
+def get_data():
+    return load_data()
 
 
-df = carregar_dados()
+df = get_data()
 
-# ---------------------------------------------------------------
-# Cabeçalho
-# ---------------------------------------------------------------
 st.markdown(
     """
-    <div class="fintrack-header">
-        <h1>💰 FinTrack — Painel de Análise de Dados</h1>
-        <p>APS · Engenharia de Software para Negócios (DADM00270) · UFPB · Base tratada de clientes</p>
+    <div class="hero">
+      <h1>FinTrack Insights</h1>
+      <p>Inteligência de dados para segmentar clientes e apoiar campanhas de depósito a prazo.</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# ---------------------------------------------------------------
-# Filtros (sidebar)
-# ---------------------------------------------------------------
-st.sidebar.markdown("### 🔎 Filtros")
+st.sidebar.title("Filtros globais")
+st.sidebar.caption("Todos os indicadores e gráficos respondem a estes filtros.")
 
-profissoes = st.sidebar.multiselect(
-    "Profissão", sorted(df["profissao"].unique()), default=[]
-)
-escolaridades = st.sidebar.multiselect(
-    "Escolaridade", sorted(df["escolaridade"].unique()), default=[]
-)
-faixa_idade = st.sidebar.slider(
+jobs = st.sidebar.multiselect("Profissão", sorted(df["profissao"].astype(str).unique()))
+education = st.sidebar.multiselect("Escolaridade", sorted(df["escolaridade"].astype(str).unique()))
+contact_types = st.sidebar.multiselect("Tipo de contato", sorted(df["tipo_contato"].astype(str).unique()))
+age = st.sidebar.slider(
     "Faixa etária",
-    int(df["idade"].min()), int(df["idade"].max()),
+    int(df["idade"].min()),
+    int(df["idade"].max()),
     (int(df["idade"].min()), int(df["idade"].max())),
 )
 
-df_f = df.copy()
-if profissoes:
-    df_f = df_f[df_f["profissao"].isin(profissoes)]
-if escolaridades:
-    df_f = df_f[df_f["escolaridade"].isin(escolaridades)]
-df_f = df_f[(df_f["idade"] >= faixa_idade[0]) & (df_f["idade"] <= faixa_idade[1])]
+filtered = df[df["idade"].between(*age)].copy()
+if jobs:
+    filtered = filtered[filtered["profissao"].isin(jobs)]
+if education:
+    filtered = filtered[filtered["escolaridade"].isin(education)]
+if contact_types:
+    filtered = filtered[filtered["tipo_contato"].isin(contact_types)]
 
-st.sidebar.markdown(
-    f"<div style='margin-top:14px; font-size:13px; color:{MUTED};'>"
-    f"<b>{len(df_f)}</b> de {len(df)} clientes selecionados</div>",
+st.sidebar.metric("Clientes no recorte", f"{len(filtered):,.0f}".replace(",", "."))
+if st.sidebar.button("Limpar filtros", width="stretch"):
+    st.rerun()
+
+if filtered.empty:
+    st.warning("Nenhum cliente corresponde aos filtros escolhidos. Ajuste o recorte na barra lateral.")
+    st.stop()
+
+metrics = summarize(filtered)
+overall = summarize(df)
+delta_conversion = metrics["taxa_adesao"] - overall["taxa_adesao"]
+
+st.subheader("Visão executiva")
+k1, k2, k3, k4, k5 = st.columns(5)
+k1.metric("Clientes", f"{metrics['clientes']:,.0f}".replace(",", "."))
+k2.metric("Adesões", f"{metrics['adesoes']:,.0f}".replace(",", "."))
+k3.metric("Taxa de adesão", f"{metrics['taxa_adesao']:.1f}%", f"{delta_conversion:+.1f} p.p. vs. base")
+k4.metric("Saldo médio anual", f"€ {metrics['saldo_medio']:,.0f}".replace(",", "."))
+k5.metric("Com empréstimo", f"{metrics['taxa_emprestimo']:.1f}%")
+st.markdown(
+    '<p class="definition">Taxa de adesão = clientes que contrataram o depósito a prazo ÷ clientes contatados. '
+    'Os valores descrevem a amostra histórica e não constituem previsão individual.</p>',
     unsafe_allow_html=True,
 )
 
-# ---------------------------------------------------------------
-# KPIs
-# ---------------------------------------------------------------
-taxa_adesao = 100 * df_f["aderiu_produto"].mean() if len(df_f) else 0
-taxa_emprestimo = 100 * df_f["possui_emprestimo_pessoal"].mean() if len(df_f) else 0
-saldo_medio = df_f["saldo_conta"].mean() if len(df_f) else 0
+st.subheader("Onde a adesão é maior?")
+left, right = st.columns(2)
 
-kpis = [
-    ("Clientes", f"{len(df_f):,}".replace(",", "."), "no filtro atual"),
-    ("Saldo médio em conta", f"€ {saldo_medio:,.0f}".replace(",", "."), "média anual"),
-    ("Taxa de adesão à campanha", f"{taxa_adesao:.1f}%", "clientes que aderiram"),
-    ("Com empréstimo pessoal", f"{taxa_emprestimo:.1f}%", "do total filtrado"),
-]
+job = segment_summary(filtered, "profissao").sort_values("taxa_adesao")
+fig = px.bar(
+    job,
+    x="taxa_adesao",
+    y="profissao",
+    orientation="h",
+    text=job["taxa_adesao"].map(lambda x: f"{x:.1f}%"),
+    hover_data={"clientes": ":,", "adesoes": ":,", "saldo_medio": ":.0f"},
+    labels={"taxa_adesao": "Taxa de adesão (%)", "profissao": "Profissão"},
+    title="Taxa de adesão por profissão",
+)
+fig.update_traces(marker_color=SECONDARY, textposition="outside")
+left.plotly_chart(style_figure(fig, 420), width="stretch", config={"displayModeBar": False})
 
-cols = st.columns(4)
-for c, (label, value, sub) in zip(cols, kpis):
-    c.markdown(
-        f"""
-        <div class="kpi-card">
-            <div class="kpi-label">{label}</div>
-            <div class="kpi-value">{value}</div>
-            <div class="kpi-sub">{sub}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+education_chart = segment_summary(filtered, "escolaridade").sort_values("taxa_adesao")
+fig = px.bar(
+    education_chart,
+    x="taxa_adesao",
+    y="escolaridade",
+    orientation="h",
+    text=education_chart["taxa_adesao"].map(lambda x: f"{x:.1f}%"),
+    hover_data={"clientes": ":,", "adesoes": ":,"},
+    labels={"taxa_adesao": "Taxa de adesão (%)", "escolaridade": "Escolaridade"},
+    title="Taxa de adesão por escolaridade",
+)
+fig.update_traces(marker_color=ACCENT, textposition="outside")
+right.plotly_chart(style_figure(fig, 420), width="stretch", config={"displayModeBar": False})
 
-st.write("")
-
-# ---------------------------------------------------------------
-# Linha 1 de gráficos
-# ---------------------------------------------------------------
+st.subheader("Contexto da campanha")
 c1, c2 = st.columns(2)
 
-with c1:
-    st.markdown(
-        '<div class="chart-card"><div class="chart-title">Saldo médio por profissão</div>'
-        '<div class="chart-subtitle">Saldo médio anual em conta (€)</div>',
-        unsafe_allow_html=True,
-    )
-    saldo_prof = (
-        df_f.groupby("profissao", as_index=False)["saldo_conta"]
-        .mean()
-        .sort_values("saldo_conta", ascending=True)
-    )
-    fig = px.bar(
-        saldo_prof, x="saldo_conta", y="profissao", orientation="h",
-        labels={"saldo_conta": "", "profissao": ""},
-        color_discrete_sequence=[PRIMARY],
-    )
-    fig.update_traces(marker_line_width=0)
-    st.plotly_chart(chart_layout(fig, 400), use_container_width=True, config={"displayModeBar": False})
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with c2:
-    st.markdown(
-        '<div class="chart-card"><div class="chart-title">Taxa de adesão por escolaridade</div>'
-        '<div class="chart-subtitle">% de clientes que aderiram à campanha</div>',
-        unsafe_allow_html=True,
-    )
-    adesao_esc = df_f.groupby("escolaridade", as_index=False)["aderiu_produto"].mean()
-    adesao_esc["taxa_pct"] = adesao_esc["aderiu_produto"] * 100
-    fig = px.bar(
-        adesao_esc.sort_values("taxa_pct"), x="taxa_pct", y="escolaridade",
-        orientation="h", labels={"taxa_pct": "", "escolaridade": ""},
-        color_discrete_sequence=[ACCENT],
-    )
-    fig.update_traces(marker_line_width=0)
-    st.plotly_chart(chart_layout(fig, 400), use_container_width=True, config={"displayModeBar": False})
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ---------------------------------------------------------------
-# Linha 2 de gráficos
-# ---------------------------------------------------------------
-c3, c4 = st.columns(2)
-
-with c3:
-    st.markdown(
-        '<div class="chart-card"><div class="chart-title">Distribuição de saldo em conta</div>'
-        '<div class="chart-subtitle">Frequência de clientes por faixa de saldo (€)</div>',
-        unsafe_allow_html=True,
-    )
-    fig = px.histogram(
-        df_f, x="saldo_conta", nbins=40,
-        labels={"saldo_conta": ""},
-        color_discrete_sequence=[ACCENT_2],
-    )
-    fig.update_traces(marker_line_width=0)
-    fig = chart_layout(fig, 340)
-    fig.update_layout(bargap=0.08)
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with c4:
-    st.markdown(
-        '<div class="chart-card"><div class="chart-title">Empréstimo pessoal ativo</div>'
-        '<div class="chart-subtitle">Proporção de clientes no filtro atual</div>',
-        unsafe_allow_html=True,
-    )
-    contagem = df_f["emprestimo_label"].value_counts()
-    fig = go.Figure(
-        data=[go.Pie(
-            labels=contagem.index,
-            values=contagem.values,
-            hole=0.62,
-            marker=dict(colors=[PRIMARY, "#DCE3E1"]),
-            textinfo="percent",
-            textfont=dict(size=13, color="white"),
-        )]
-    )
-    st.plotly_chart(chart_layout(fig, 340), use_container_width=True, config={"displayModeBar": False})
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ---------------------------------------------------------------
-# Linha 3 — tendência mensal
-# ---------------------------------------------------------------
-st.markdown(
-    '<div class="chart-card"><div class="chart-title">Adesão à campanha ao longo dos meses de contato</div>'
-    '<div class="chart-subtitle">Taxa de adesão (%) por mês em que o contato foi feito</div>',
-    unsafe_allow_html=True,
-)
-ordem_meses = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
-adesao_mes = df_f.groupby("mes_contato", as_index=False)["aderiu_produto"].mean()
-adesao_mes["mes_contato"] = pd.Categorical(adesao_mes["mes_contato"], categories=ordem_meses, ordered=True)
-adesao_mes = adesao_mes.sort_values("mes_contato")
-adesao_mes["taxa_pct"] = adesao_mes["aderiu_produto"] * 100
-
+monthly = segment_summary(filtered, "mes_contato").sort_values("mes_contato")
 fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=adesao_mes["mes_contato"], y=adesao_mes["taxa_pct"],
-    mode="lines+markers",
-    line=dict(color=PRIMARY, width=3, shape="spline"),
-    marker=dict(size=8, color=PRIMARY),
-    fill="tozeroy",
-    fillcolor="rgba(46, 125, 107, 0.10)",
-))
-st.plotly_chart(chart_layout(fig, 340), use_container_width=True, config={"displayModeBar": False})
-st.markdown("</div>", unsafe_allow_html=True)
+fig.add_trace(
+    go.Scatter(
+        x=monthly["mes_contato"].astype(str),
+        y=monthly["taxa_adesao"],
+        mode="lines+markers+text",
+        text=monthly["clientes"].map(lambda n: f"n={n}"),
+        textposition="top center",
+        line=dict(color=PRIMARY, width=3),
+        marker=dict(size=8),
+        name="Adesão",
+    )
+)
+fig.update_layout(title="Taxa mensal e tamanho da amostra")
+fig.update_yaxes(title="Taxa de adesão (%)")
+c1.plotly_chart(style_figure(fig, 380), width="stretch", config={"displayModeBar": False})
 
-# ---------------------------------------------------------------
-# Tabela de dados filtrados
-# ---------------------------------------------------------------
-with st.expander("🔍 Ver dados filtrados (tabela)"):
-    st.dataframe(df_f, use_container_width=True)
+previous = segment_summary(filtered, "resultado_campanha_anterior").sort_values("taxa_adesao")
+fig = px.bar(
+    previous,
+    x="taxa_adesao",
+    y="resultado_campanha_anterior",
+    orientation="h",
+    text=previous["taxa_adesao"].map(lambda x: f"{x:.1f}%"),
+    hover_data={"clientes": ":,", "adesoes": ":,"},
+    labels={"taxa_adesao": "Taxa de adesão (%)", "resultado_campanha_anterior": "Resultado anterior"},
+    title="Resultado da campanha anterior",
+)
+fig.update_traces(marker_color=BLUE, textposition="outside")
+c2.plotly_chart(style_figure(fig, 380), width="stretch", config={"displayModeBar": False})
 
-st.markdown(
-    f"<p style='color:{MUTED}; font-size:12.5px; margin-top:10px;'>"
-    "Fonte dos dados: Bank Marketing Dataset (tratado) — dados_tratados.csv</p>",
-    unsafe_allow_html=True,
+st.info(
+    "Leitura recomendada: compare taxa e volume antes de priorizar um segmento. "
+    "Meses ou grupos pequenos podem apresentar taxas altas com maior incerteza."
+)
+
+st.subheader("Tabela operacional de segmentos")
+dimension = st.selectbox(
+    "Agrupar clientes por",
+    options=["profissao", "escolaridade", "tipo_contato", "mes_contato", "resultado_campanha_anterior"],
+    format_func=lambda x: {
+        "profissao": "Profissão",
+        "escolaridade": "Escolaridade",
+        "tipo_contato": "Tipo de contato",
+        "mes_contato": "Mês de contato",
+        "resultado_campanha_anterior": "Resultado anterior",
+    }[x],
+)
+table = segment_summary(filtered, dimension).sort_values(["taxa_adesao", "clientes"], ascending=False)
+table = table.rename(
+    columns={
+        dimension: "Segmento",
+        "clientes": "Clientes",
+        "adesoes": "Adesões",
+        "taxa_adesao": "Taxa de adesão (%)",
+        "saldo_medio": "Saldo médio anual (€)",
+    }
+)
+st.dataframe(
+    table.style.format({"Taxa de adesão (%)": "{:.1f}", "Saldo médio anual (€)": "{:,.0f}"}),
+    width="stretch",
+    hide_index=True,
+)
+
+with st.expander("Metodologia, fonte e limitações"):
+    st.markdown(
+        """
+        - **Fonte:** Bank Marketing, UCI Machine Learning Repository, amostra `bank.csv` com 4.521 registros.
+        - **Unidade de análise:** um cliente contatado em uma campanha de marketing direto.
+        - **Desfecho:** adesão ou não a um depósito a prazo.
+        - **Limitação:** a base é histórica, amostral e não contém custos de campanha nem datas completas.
+        - **Cuidado analítico:** duração da ligação só é conhecida após o contato; por isso não deve ser usada para selecionar previamente clientes.
+        - **Uso responsável:** o painel apoia análise agregada. Não recomenda decisões individuais automatizadas.
+        """
+    )
+
+st.caption(
+    "Fonte: Moro, Rita & Cortez (2014), UCI Bank Marketing, DOI 10.24432/C5K306 · "
+    "Snapshot acadêmico tratado para a AV2."
 )

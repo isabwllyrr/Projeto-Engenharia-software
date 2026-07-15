@@ -1,158 +1,149 @@
-# FinTrack — Sistema de Gestão de Gastos Pessoais
+# FinTrack Insights — Inteligência para Campanhas Bancárias
 
-**APS — Atividades Práticas Supervisionadas**
-DADM00270 — Engenharia de Software para Negócios — UFPB (2026.1)
-Entrega: **AV2** — Protótipo de Software Orientado a Dados
+**APS — Engenharia de Software para Negócios — UFPB (2026.1)**
 
-**Aluno(s):** Isabelly, Maria Dionila e Maria Carolina
+**Entrega:** AV2 — Protótipo de Software Orientado a Dados
+
+**Equipe:** Isabelly, Maria Dionila e Maria Carolina
 
 **Professor:** Alandey Severo Leite da Silva
 
----
+## Resumo
 
-## 1. Introdução
+O FinTrack Insights é um protótipo de apoio à decisão para equipes de marketing bancário. A solução integra um protótipo navegável e um dashboard interativo para analisar o desempenho histórico de campanhas de depósito a prazo, comparar segmentos e documentar critérios de priorização. O projeto utiliza uma amostra pública tratada do Bank Marketing Dataset, com 4.521 clientes e 18 campos. Na amostra, 521 clientes aderiram ao produto, correspondendo a uma taxa geral de 11,52%. A proposta não automatiza decisões individuais: apresenta evidências agregadas e limitações para apoiar análise humana responsável.
 
-Este projeto tem como objetivo desenvolver um protótipo de software orientado a dados, aplicando conceitos de Engenharia de Software e Ciência de Dados na solução de um problema real: a dificuldade de controle financeiro pessoal.
+## Problema e público-alvo
 
-## 2. Objetivo Geral
+Campanhas de marketing direto podem consumir tempo e capacidade operacional quando são planejadas sem evidências sobre volume, perfil e histórico de resposta. O problema abordado é a dificuldade de transformar registros de campanhas anteriores em informações compreensíveis para priorizar segmentos.
 
-Desenvolver um protótipo de sistema web/mobile que permita ao usuário registrar receitas e despesas, visualizar seus gastos em um dashboard interativo e receber alertas quando estiver próximo de estourar o orçamento definido.
+O público-alvo são analistas de marketing, gestores comerciais e profissionais responsáveis pelo planejamento e acompanhamento de campanhas bancárias.
 
-## 3. Objetivos Específicos
+## Objetivos
 
-- Identificar e analisar um problema real de controle financeiro
-- Levantar requisitos funcionais e não funcionais
-- Modelar o sistema (casos de uso e fluxo de navegação)
-- Desenvolver um protótipo navegável
-- Integrar dados ao sistema (dashboard interativo)
-- Validar a solução com usuários (SUS)
-- Documentar todo o processo
+### Objetivo geral
 
-## 4. Definição do Problema
+Desenvolver um protótipo orientado a dados que ajude equipes bancárias a explorar o histórico de campanhas, comparar segmentos e justificar decisões de priorização.
 
-**Contexto:** grande parte dos jovens e estudantes universitários não tem uma rotina estruturada de controle financeiro, o que dificulta saber quanto foi gasto por categoria e se o orçamento do mês está sendo respeitado.
+### Objetivos específicos
 
-**Público-alvo:** estudantes universitários e jovens profissionais que querem organizar receitas e despesas pessoais.
+- apresentar indicadores de clientes, adesões, taxa de adesão e saldo médio;
+- permitir filtros por profissão, escolaridade, tipo de contato e idade;
+- comparar taxa e volume para evitar decisões baseadas apenas em percentuais;
+- registrar um plano de campanha com segmento e justificativa;
+- explicitar fonte, definições, limitações e cuidados de uso;
+- validar a experiência do protótipo com usuários por meio do SUS.
 
-**Justificativa:** um sistema simples e orientado a dados reduz o esforço de organizar finanças pessoais e apoia decisões do dia a dia.
+## Fonte de dados
 
-## 5. Levantamento de Requisitos
+O projeto usa o **Bank Marketing Dataset**, relacionado a campanhas telefônicas de uma instituição bancária portuguesa. O arquivo tratado deste repositório corresponde à amostra `bank.csv`, com 4.521 registros e 17 variáveis originais, acrescida de `cliente_id`.
 
-### Requisitos Funcionais
+- Fonte oficial: [UCI Machine Learning Repository — Bank Marketing](https://archive.ics.uci.edu/dataset/222/bank)
+- Autores: S. Moro, P. Rita e P. Cortez
+- DOI: [10.24432/C5K306](https://doi.org/10.24432/C5K306)
+- Licença da fonte: CC BY 4.0
+- Unidade de análise: cliente contatado em campanha
+- Variável de resultado: adesão a depósito a prazo
 
-- RF01 — Cadastro e login do usuário
-- RF02 — Registrar despesa (valor, categoria, data, descrição)
-- RF03 — Registrar receita (valor, origem, data)
-- RF04 — Exibir total gasto no mês
-- RF05 — Exibir gráfico de gastos por categoria
-- RF06 — Exibir evolução de gastos ao longo dos meses
-- RF07 — Definir orçamento mensal por categoria
-- RF08 — Alertar quando uma categoria ultrapassar 80% do orçamento
-- RF09 — Editar ou excluir lançamento
+O [dicionário de dados](docs/dicionario_dados.md) registra o significado das colunas e as transformações aplicadas.
 
-### Requisitos Não Funcionais
+## Principais achados da amostra
 
-- RNF01 — Dashboard deve carregar em até 2 segundos
-- RNF02 — Interface responsiva (desktop e mobile)
-- RNF03 — Autenticação obrigatória para proteger dados
-- RNF04 — Usabilidade validada com teste de usuários (SUS)
-- RNF05 — Padrão visual consistente entre telas
+- 4.521 clientes e 521 adesões;
+- taxa geral de adesão de **11,52%**;
+- clientes com sucesso em campanha anterior apresentam taxa de **64,34%** (`n=129`);
+- aposentados apresentam taxa de **23,48%** (`n=230`);
+- estudantes apresentam taxa de **22,62%** (`n=84`);
+- contatos sem tipo informado apresentam taxa inferior aos contatos por celular ou telefone.
 
-## 6. Modelagem do Sistema
+Os resultados são descritivos. Grupos pequenos podem apresentar percentuais instáveis e não devem ser interpretados como causalidade ou previsão individual.
 
-*(diagramas de casos de uso e fluxo de navegação — ver seção 13, Pendências)*
+## Requisitos
 
-**Fluxo principal do protótipo:** Login/Cadastro → Dashboard → Novo lançamento / Relatórios / Metas → Perfil.
+### Funcionais
 
-## 7. Prototipação (UX/UI)
+- **RF01:** permitir acesso simulado ao protótipo;
+- **RF02:** exibir indicadores gerais da campanha;
+- **RF03:** filtrar clientes por características disponíveis;
+- **RF04:** comparar segmentos por taxa de adesão e volume;
+- **RF05:** apresentar evolução por mês de contato;
+- **RF06:** consultar tabela operacional de segmentos;
+- **RF07:** registrar um plano simulado de campanha;
+- **RF08:** informar fonte, definições e limitações dos dados.
 
-Protótipo navegável desenvolvido em **HTML/CSS/JS** (mockup de app mobile clicável, sem necessidade de servidor ou conta em ferramenta externa), contendo as telas:
+### Não funcionais
 
-1. Login / Cadastro
-2. Dashboard (home)
-3. Novo lançamento
-4. Relatórios
-5. Metas e orçamento
-6. Perfil / Configurações
+- **RNF01:** interface responsiva e legível em desktop e dispositivos móveis;
+- **RNF02:** carregamento local da base com cache do Streamlit;
+- **RNF03:** mensagens claras para filtros sem resultados;
+- **RNF04:** métricas reconciliáveis com a base tratada;
+- **RNF05:** contraste e hierarquia visual consistentes;
+- **RNF06:** uso agregado e responsável, sem decisão automatizada sobre indivíduos;
+- **RNF07:** usabilidade avaliada por teste com usuários e questionário SUS antes da entrega final.
 
-📄 **Arquivo:** [`prototipo_fintrack.html`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/prototipo_fintrack.html)
-👉 Para visualizar, baixe o arquivo e abra com duplo clique no navegador — a navegação entre todas as telas funciona por clique, direto na barra inferior do app.
+## Modelagem
 
-## 8. Integração com Dados (diferencial da disciplina)
+A modelagem contempla casos de uso, fluxo de navegação, componentes e rastreabilidade entre requisitos e telas. Consulte [docs/modelagem.md](docs/modelagem.md).
 
-### Fonte de dados
+## Entregas da AV2
 
-Como dados de gastos pessoais individuais não são publicamente disponíveis (questão de privacidade), utilizamos um dataset público real e amplamente reconhecido em ciência de dados — o Bank Marketing Dataset — contendo informações financeiras reais de 4.521 clientes (idade, profissão, saldo em conta, empréstimos, participação em campanha). Ele foi usado aqui como base real para demonstrar o pipeline completo de tratamento, banco de dados e dashboard que o FinTrack aplicaria sobre dados financeiros de usuários.
+1. **Protótipo navegável:** [`prototipo_fintrack.html`](prototipo_fintrack.html)
+2. **Elemento de dados:** [`dashboard.py`](dashboard.py)
+3. **Apresentação:** [`docs/FinTrack_Insights_AV2.pptx`](docs/FinTrack_Insights_AV2.pptx)
+4. **Modelagem:** [`docs/modelagem.md`](docs/modelagem.md)
+5. **Plano de validação SUS:** [`docs/validacao_sus.md`](docs/validacao_sus.md)
 
-### Tratamento de dados (ETL)
+## Como executar
 
-Aplicado sobre [`dados_tratados.csv`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/dados_tratados.csv), com o processo completo documentado em [`analise_dados.ipynb`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/analise_dados.ipynb):
+Consulte [COMO_RODAR.md](COMO_RODAR.md). Resumo:
 
-- Padronização de valores "unknown" para "nao_informado"
-- Conversão de colunas binárias (yes/no) para booleano
-- Renomeação de colunas técnicas para nomes de negócio em português
-- Verificação e remoção de duplicatas
-- Adição de chave primária (cliente_id)
-
-### Banco de dados
-
-Os dados tratados foram carregados em um banco SQL relacional (SQLite) — [`fintrack.db`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/fintrack.db) — com schema documentado em [`schema.sql`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/schema.sql). SQLite foi escolhido por ser um banco relacional completo, sem necessidade de servidor, ideal para protótipo acadêmico (o mesmo SQL funciona em PostgreSQL com ajustes mínimos de tipos).
-
-### Dashboard
-
-Dashboard interativo em **Python (Streamlit + Plotly)**, alimentado pelos dados reais tratados:
-
-- Saldo médio em conta por profissão
-- Taxa de adesão à campanha por escolaridade
-- Distribuição de saldo em conta
-- Proporção de clientes com empréstimo pessoal ativo
-- Evolução da taxa de adesão por mês de contato
-- Filtros interativos por profissão, escolaridade e faixa etária
-
-Código-fonte: [`dashboard.py`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/dashboard.py)
-Tema visual: [`.streamlit/config.toml`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/.streamlit/config.toml)
-
-## 9. Implementação (opcional)
-
-Este projeto já entrega uma versão funcional do elemento de dados como aplicação Streamlit, indo além do protótipo estático — cumprindo o item opcional de implementação sugerido pelo professor.
-
-## 10. Testes e Validação
-
-*(questionário SUS e teste com usuários — ver seção 13, Pendências)*
-
-## 11. Estrutura do Repositório
-
-```
-├── README.md                    ← este arquivo
-├── prototipo_fintrack.html      ← protótipo navegável (telas do app)
-├── dashboard.py                 ← dashboard interativo (elemento de dados)
-├── requirements.txt             ← dependências Python do dashboard
-├── COMO_RODAR.md                ← passo a passo para rodar o dashboard
-├── .streamlit/
-│   └── config.toml              ← tema visual do dashboard
-├── dados_tratados.csv           ← dataset após limpeza e tratamento
-├── fintrack.db                  ← banco de dados SQLite (populado)
-├── schema.sql                   ← script de criação das tabelas (SQL)
-└── analise_dados.ipynb          ← notebook com o tratamento e os gráficos
-```
-
-## 12. Como executar
-
-**Protótipo navegável:** baixe `prototipo_fintrack.html` e abra com duplo clique no navegador.
-
-**Dashboard de dados:**
-```
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 streamlit run dashboard.py
 ```
-Abre automaticamente em `http://localhost:8501`. Passo a passo detalhado em [`COMO_RODAR.md`](https://github.com/isabwllyrr/Projeto_Eng_Software/blob/main/COMO_RODAR.md).
 
-**Notebook de tratamento dos dados:** o GitHub renderiza `analise_dados.ipynb` automaticamente — basta abrir o arquivo na interface do GitHub para ver os gráficos, sem precisar rodar nada.
+O protótipo não precisa de servidor: abra `prototipo_fintrack.html` no navegador.
 
-## 13. Metodologia de Desenvolvimento
+## Estrutura
 
-Recomenda-se organização por Kanban (ex: quadro no Trello ou GitHub Projects), com tarefas divididas entre os integrantes do grupo.
+```text
+.
+├── .streamlit/config.toml
+├── app_core.py
+├── dashboard.py
+├── dados_tratados.csv
+├── prototipo_fintrack.html
+├── requirements.txt
+├── COMO_RODAR.md
+├── docs/
+│   ├── FinTrack_Insights_AV2.pptx
+│   ├── dicionario_dados.md
+│   ├── modelagem.md
+│   └── validacao_sus.md
+├── scripts/validar_dados.py
+└── tests/test_app_core.py
+```
 
-## 15. Conclusão
+## Metodologia
 
-Este projeto integra conceitos de Engenharia de Software e Ciência de Dados, propondo uma solução tecnológica real para controle financeiro pessoal, com foco em inovação, dados e experiência do usuário.
+O trabalho foi organizado em cinco etapas: definição do problema, análise dos requisitos, validação da qualidade da base, prototipação e construção do dashboard. A inspeção dos dados verifica colunas obrigatórias, unicidade de `cliente_id`, domínio da variável-alvo, valores nulos e duplicidades. O desenvolvimento pode ser acompanhado por Kanban e validado em ciclos curtos com usuários do público-alvo.
+
+## Testes e validação
+
+A base possui um script de validação reproduzível e testes das métricas. A validação de usabilidade depende de participantes reais e **não foi simulada**. O protocolo, as tarefas, o questionário SUS e a tabela para registrar resultados estão prontos em [docs/validacao_sus.md](docs/validacao_sus.md). Após a aplicação, o grupo deve incluir quantidade de participantes, escore SUS, problemas observados e mudanças realizadas.
+
+## Limitações
+
+- a base é histórica e corresponde a uma amostra de 10%;
+- não há custo de campanha, receita gerada ou datas completas;
+- taxas altas em segmentos pequenos têm maior incerteza;
+- duração do contato é conhecida apenas após a ligação e não deve ser usada para segmentação prévia;
+- os resultados não demonstram relação causal;
+- o protótipo simula fluxos e não possui autenticação ou persistência reais.
+
+## Referências
+
+MORO, S.; RITA, P.; CORTEZ, P. **Bank Marketing**. UCI Machine Learning Repository, 2014. DOI: 10.24432/C5K306.
+
+BROOKE, J. SUS: A “quick and dirty” usability scale. In: JORDAN, P. W. et al. *Usability Evaluation in Industry*. London: Taylor & Francis, 1996.
