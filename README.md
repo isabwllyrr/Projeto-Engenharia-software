@@ -5,6 +5,7 @@ DADM00270 — Engenharia de Software para Negócios — UFPB (2026.1)
 Entrega: **AV2** — Protótipo de Software Orientado a Dados
 
 **Aluno(s):** Isabelly, Maria Dionila e Maria Carolina
+
 **Professor:** Alandey Severo Leite da Silva
 
 ---
@@ -148,14 +149,7 @@ Abre automaticamente em `http://localhost:8501`. Passo a passo detalhado em [`CO
 
 **Notebook de tratamento dos dados:** o GitHub renderiza `analise_dados.ipynb` automaticamente — basta abrir o arquivo na interface do GitHub para ver os gráficos, sem precisar rodar nada.
 
-## 13. Pendências
-
-- [ ] Diagrama de casos de uso e fluxo de navegação (seção 6)
-- [ ] Teste de usabilidade com usuários reais + questionário SUS (seção 10)
-- [ ] Apresentação de 10 a 15 minutos (entrega da AV2)
-- [ ] Nome(s) do(s) aluno(s) neste README
-
-## 14. Metodologia de Desenvolvimento
+## 13. Metodologia de Desenvolvimento
 
 Recomenda-se organização por Kanban (ex: quadro no Trello ou GitHub Projects), com tarefas divididas entre os integrantes do grupo.
 
